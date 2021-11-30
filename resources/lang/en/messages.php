@@ -1377,4 +1377,49 @@
   'city' => 'City',
   'Enter your country' => 'Enter your country',
   'Enter your city' => 'Enter your city',
+  'DHL Parcel' => 'DHL Parcel',
+  'SMS' => 'SMS',
+  'NEXMO' => 'NEXMO',
+  'nexmo_gateway' => 'Nexmo gateway',
+  'Gateway' => 'Gateway',
+  'PARSEL' => 'PARSEL',
+  'DHL' => 'DHL',
+  'DHL_Portal' => 'DHL Portal',
+  'Parcel' => 'Parcel',
+  'Configure' => 'Configure',
+  'dhl_parcel' => 'Dhl parcel',
+  'DHL_Parcel' => 'DHL Parcel',
+  'Shipping_Module' => 'Shipping Module',
+  'Shipping_Method' => 'Shipping Method',
+  'JNE' => 'JNE',
+  'Si_CEPAT' => 'Si CEPAT',
+  'TIKI' => 'TIKI',
+  'Please enter your phone
+                                        number' => 'Please enter your phone
+                                        number',
+  'Please enter valid email
+                                        address' => 'Please enter valid email
+                                        address',
+  'Please enter your last city
+                                        address' => 'Please enter your last city
+                                        address',
+  'Please enter your first
+                                        name' => 'Please enter your first
+                                        name',
+  'Please enter your province
+                                        address' => 'Please enter your province
+                                        address',
+  'province' => 'Province',
+  'Select_Province_Address' => 'Select Province Address',
+  'Province' => 'Province',
+  'Please select your country' => 'Please select your country',
+  'Please enter your address' => 'Please enter your address',
+  'Please enter your city
+                                        address' => 'Please enter your city
+                                        address',
+  'Please enter your province' => 'Please enter your province',
+  'sign_up' => 'Sign up',
+  'Verification_code_or_OTP mismatched' => 'Verification code or OTP mismatched',
+  'State_/_Province' => 'State / Province',
+  'state' => 'State',
 );

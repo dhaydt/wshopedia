@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customer\Auth;
 use App\CPU\CartManager;
 use App\CPU\Helpers;
 use App\CPU\SMS_module;
+use function App\CPU\translate;
 use App\Http\Controllers\Controller;
 use App\Model\BusinessSetting;
 use App\Model\PhoneOrEmailVerification;
@@ -16,7 +17,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Session;
-use function App\CPU\translate;
 
 class RegisterController extends Controller
 {
@@ -28,11 +28,72 @@ class RegisterController extends Controller
     public function register()
     {
         session()->put('keep_return_url', url()->previous());
-        return view('customer-view.auth.register');
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL => config('rajaongkir.url').'/province',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => [
+                'key:'.config('rajaongkir.api_key'),
+            ],
+        ]);
+
+        $resp = curl_exec($curl);
+        $err = curl_error($curl);
+        $resp = json_decode($resp, true);
+        $prov = $resp['rajaongkir']['results'];
+
+        // dd($prov);
+
+        curl_close($curl);
+
+        if ($err) {
+            echo 'cURL Error #:'.$err;
+        } else {
+            return view('customer-view.auth.register', ['prov' => $prov]);
+        }
+    }
+
+    public function getCity($id)
+    {
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL => config('rajaongkir.url').'/city?&province='.$id,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => [
+                'key:'.config('rajaongkir.api_key'),
+            ],
+        ]);
+
+        $resp = curl_exec($curl);
+        $err = curl_error($curl);
+        $resp = json_decode($resp, true);
+        $data = $resp['rajaongkir']['results'];
+
+        // dd($prov);
+
+        curl_close($curl);
+
+        if ($err) {
+            echo 'cURL Error #:'.$err;
+        } else {
+            return $data;
+        }
     }
 
     public function submit(Request $request)
     {
+        // dd($request);
         $user = User::where('email', $request->email)->orWhere('phone', $request->phone)->first();
         if (isset($user) && $user->is_phone_verified == 0 && $user->is_email_verified == 0) {
             return redirect(route('customer.auth.check', [$user->id]));
@@ -40,22 +101,81 @@ class RegisterController extends Controller
 
         $request->validate([
             'f_name' => 'required',
+            'address' => 'required',
+            'country' => 'required',
+            'province' => 'required',
+            'city' => 'required',
             'email' => 'required|email|unique:users',
             'phone' => 'unique:users',
-            'password' => 'required|min:8|same:con_password'
+            'password' => 'required|min:8|same:con_password',
         ],
             [
                 'f_name.required' => 'First name is required',
+                'address.required' => 'Address name is required',
+                'country.required' => 'Country name is required',
+                'province.required' => 'Province name is required',
+                'city.required' => 'City name is required',
             ]);
 
+        if ($request['country'] == 'indonesia' || $request['country'] == 'Indonesia') {
+            $provin = $request['province'];
+            $provins = explode(',', $provin);
+            $prov_id = $provins[0];
+            $prov = $provins[1];
+
+            $cities = $request['city'];
+            $cit = explode(',', $cities);
+            $city_id = $cit[0];
+            $city = $cit[1];
+        } else {
+            $prov = $request['province'];
+            $prov_id = '0';
+
+            $city = $request['city'];
+            $city_id = '0';
+        }
+
+        $fn = $request['f_name'];
+        $ln = $request['l_name'];
+        $add = $request['address'];
+        $country = $request['country'];
+        $email = $request['email'];
+        $phone = $request['phone'];
+        // dd($prov_id, $prov, $city_id, $city);
+
         $user = User::create([
-            'f_name' => $request['f_name'],
-            'l_name' => $request['l_name'],
-            'email' => $request['email'],
-            'phone' => $request['phone'],
+            'f_name' => $fn,
+            'l_name' => $ln,
+            'address' => $add,
+            'country' => $country,
+            'prov_id' => $prov_id,
+            'province' => $prov,
+            'city_id' => $city_id,
+            'city' => $city,
+            'email' => $email,
+            'phone' => $phone,
             'is_active' => 1,
-            'password' => bcrypt($request['password'])
+            'password' => bcrypt($request['password']),
         ]);
+
+        $user_id = User::latest()->first();
+        // dd($user_id);
+        $address = [
+            'customer_id' => $user_id['id'],
+            'contact_person_name' => $fn.' '.$ln,
+            'address_type' => 'home',
+            'address' => $add,
+            'city' => $city,
+            'city_id' => $city_id,
+            // 'zip' => $request->zip,
+            'phone' => $phone,
+            'state' => $prov,
+            'state_id' => $prov_id,
+            'country' => $country,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+        DB::table('shipping_addresses')->insert($address);
 
         $phone_verification = Helpers::get_business_settings('phone_verification');
         $email_verification = Helpers::get_business_settings('email_verification');
@@ -67,6 +187,7 @@ class RegisterController extends Controller
         }
 
         Toastr::success(translate('registration_success_login_now'));
+
         return redirect(route('customer.auth.login'));
     }
 
@@ -126,12 +247,11 @@ class RegisterController extends Controller
                 }
 
                 Toastr::success(translate('verification_done_successfully'));
-
             } else {
                 Toastr::error(translate('Verification_code_or_OTP mismatched'));
+
                 return redirect()->back();
             }
-
         } else {
             if (isset($verify)) {
                 try {
@@ -146,7 +266,6 @@ class RegisterController extends Controller
             } else {
                 Toastr::error('Verification code/ OTP mismatched');
             }
-
         }
 
         return redirect(route('customer.auth.login'));
@@ -157,7 +276,7 @@ class RegisterController extends Controller
         if (auth('customer')->attempt(['email' => $email, 'password' => $password], true)) {
             session()->put('wish_list', Wishlist::where('customer_id', $user->id)->pluck('product_id')->toArray());
             $company_name = BusinessSetting::where('type', 'company_name')->first();
-            $message = 'Welcome to ' . $company_name->value . '!';
+            $message = 'Welcome to '.$company_name->value.'!';
             CartManager::cart_to_db();
         } else {
             $message = 'Credentials are not matched or your account is not active!';
@@ -165,5 +284,4 @@ class RegisterController extends Controller
 
         return $message;
     }
-
 }

@@ -17,20 +17,22 @@ use Illuminate\Support\Facades\Route;
 Route::get('authentication-failed', function () {
     $errors = [];
     array_push($errors, ['code' => 'auth-001', 'message' => 'Unauthorized.']);
+
     return response()->json([
-        'errors' => $errors
+        'errors' => $errors,
     ], 401);
 })->name('authentication-failed');
 
 Route::group(['namespace' => 'Customer', 'prefix' => 'customer', 'as' => 'customer.'], function () {
-
     Route::group(['namespace' => 'Auth', 'prefix' => 'auth', 'as' => 'auth.'], function () {
         Route::get('login', 'LoginController@login')->name('login');
         Route::post('login', 'LoginController@submit');
         Route::get('logout', 'LoginController@logout')->name('logout');
 
         Route::get('register', 'RegisterController@register')->name('register');
+
         Route::post('register', 'RegisterController@submit');
+        Route::get('city/{id}', 'RegisterController@getCity');
 
         Route::get('check/{id}', 'RegisterController@check')->name('check');
 
@@ -64,4 +66,3 @@ Route::group(['namespace' => 'Customer', 'prefix' => 'customer', 'as' => 'custom
         });
     });
 });
-

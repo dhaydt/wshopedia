@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Route;
  */
 
 Route::group(['namespace' => 'api\v1', 'prefix' => 'v1', 'middleware' => ['api_lang']], function () {
-
     Route::group(['prefix' => 'auth', 'namespace' => 'auth'], function () {
         Route::post('register', 'PassportAuthController@register');
         Route::post('login', 'PassportAuthController@login');
@@ -36,14 +35,14 @@ Route::group(['namespace' => 'api\v1', 'prefix' => 'v1', 'middleware' => ['api_l
         Route::get('/', 'ConfigController@configuration');
     });
 
-    Route::group(['prefix' => 'shipping-method','middleware'=>'auth:api'], function () {
+    Route::group(['prefix' => 'shipping-method', 'middleware' => 'auth:api'], function () {
         Route::get('detail/{id}', 'ShippingMethodController@get_shipping_method_info');
         Route::get('by-seller/{id}/{seller_is}', 'ShippingMethodController@shipping_methods_by_seller');
         Route::post('choose-for-order', 'ShippingMethodController@choose_for_order');
         Route::get('chosen', 'ShippingMethodController@chosen_shipping_methods');
     });
 
-    Route::group(['prefix' => 'cart','middleware'=>'auth:api'], function () {
+    Route::group(['prefix' => 'cart', 'middleware' => 'auth:api'], function () {
         Route::get('/', 'CartController@cart');
         Route::post('add', 'CartController@add_to_cart');
         Route::put('update', 'CartController@update_cart');
@@ -142,13 +141,13 @@ Route::group(['namespace' => 'api\v1', 'prefix' => 'v1', 'middleware' => ['api_l
     });
 
     Route::group(['prefix' => 'seller'], function () {
-        Route::get('/', 'SellerController@get_seller_info');
+        Route::get('/{id}', 'SellerController@get_seller_info');
         Route::get('{seller_id}/products', 'SellerController@get_seller_products');
         Route::get('top', 'SellerController@get_top_sellers');
         Route::get('all', 'SellerController@get_all_sellers');
     });
 
-    Route::group(['prefix' => 'coupon','middleware' => 'auth:api'], function () {
+    Route::group(['prefix' => 'coupon', 'middleware' => 'auth:api'], function () {
         Route::get('apply', 'CouponController@apply');
     });
 });

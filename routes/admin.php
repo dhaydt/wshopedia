@@ -279,6 +279,10 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'as' => 'admin.'], fu
                 Route::post('status-update', 'ShippingMethodController@status_update')->name('status-update');
                 Route::get('setting', 'ShippingMethodController@setting')->name('setting');
                 Route::post('shipping-store', 'ShippingMethodController@shippingStore')->name('shipping-store');
+
+                // DHL
+                Route::get('dhl', 'DHLController@index')->name('dhl');
+                Route::post('dhl/update', 'DHLController@update')->name('dhlUpdate');
             });
 
             Route::group(['prefix' => 'language', 'as' => 'language.', 'middleware' => ['module:business_settings']], function () {
