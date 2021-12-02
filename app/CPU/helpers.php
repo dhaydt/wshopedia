@@ -9,6 +9,7 @@ use App\Model\Color;
 use App\Model\Coupon;
 use App\Model\Currency;
 use App\Model\Order;
+use App\Model\Product;
 use App\Model\Review;
 use App\Model\Seller;
 use App\Model\ShippingMethod;
@@ -29,6 +30,14 @@ class Helpers
         }
 
         return $x;
+    }
+
+    public static function country()
+    {
+        $country = Product::all()->unique('country')->pluck('country');
+        // dd($country);
+
+        return $country;
     }
 
     public static function transaction_formatter($transaction)

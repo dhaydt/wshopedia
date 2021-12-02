@@ -16,12 +16,14 @@ use Illuminate\Support\Facades\Route;
 //for maintenance mode
 Route::get('maintenance-mode', 'Web\WebController@maintenance_mode')->name('maintenance-mode');
 
-Route::group(['namespace' => 'Web','middleware'=>['maintenance_mode']], function () {
+Route::group(['namespace' => 'Web', 'middleware' => ['maintenance_mode']], function () {
     Route::get('/', 'WebController@home')->name('home');
     Route::get('quick-view', 'WebController@quick_view')->name('quick-view');
     Route::get('searched-products', 'WebController@searched_products')->name('searched-products');
 
-    Route::group(['middleware'=>['customer']], function () {
+    Route::get('shortBy/{country}', 'ShortHomeController@shortBy')->name('shortBy');
+
+    Route::group(['middleware' => ['customer']], function () {
         Route::get('checkout-details', 'WebController@checkout_details')->name('checkout-details');
         Route::get('checkout-shipping', 'WebController@checkout_shipping')->name('checkout-shipping')->middleware('customer');
         Route::get('checkout-payment', 'WebController@checkout_payment')->name('checkout-payment')->middleware('customer');
@@ -125,7 +127,6 @@ Route::group(['namespace' => 'Web','middleware'=>['maintenance_mode']], function
 Route::group(['prefix' => 'shop', 'as' => 'shop.', 'namespace' => 'Seller\Auth'], function () {
     Route::get('apply', 'RegisterController@create')->name('apply');
     Route::post('apply', 'RegisterController@store');
-
 });
 
 //check done
@@ -180,14 +181,13 @@ Route::get('payment-razor/fail', 'RazorPayController@success')->name('payment-ra
 Route::get('payment-success', 'Customer\PaymentController@success')->name('payment-success');
 Route::get('payment-fail', 'Customer\PaymentController@fail')->name('payment-fail');
 
-
 //senang pay
 Route::match(['get', 'post'], '/return-senang-pay', 'SenangPayController@return_senang_pay')->name('return-senang-pay');
 
 //paystack
 Route::post('/paystack-pay', 'PaystackController@redirectToGateway')->name('paystack-pay');
 Route::get('/paystack-callback', 'PaystackController@handleGatewayCallback')->name('paystack-callback');
-Route::get('/paystack',function (){
+Route::get('/paystack', function () {
     return view('paystack');
 });
 
@@ -195,13 +195,12 @@ Route::get('/paystack',function (){
 Route::post('/paymob-credit', 'PaymobController@credit')->name('paymob-credit');
 Route::get('/paymob-callback', 'PaymobController@callback')->name('paymob-callback');
 
-
 //paytabs
 Route::any('/paytabs-payment', 'PaytabsController@payment')->name('paytabs-payment');
 Route::any('/paytabs-response', 'PaytabsController@callback_response')->name('paytabs-response');
 
 //bkash
-Route::group(['prefix'=>'bkash'], function () {
+Route::group(['prefix' => 'bkash'], function () {
     // Payment Routes for bKash
     Route::post('get-token', 'BkashPaymentController@getToken')->name('bkash-get-token');
     Route::post('create-payment', 'BkashPaymentController@createPayment')->name('bkash-create-payment');
@@ -218,7 +217,6 @@ Route::group(['prefix'=>'bkash'], function () {
 Route::any('/fawry-payment', 'FawryPaymentController@payment')->name('fawry-payment');
 Route::any('/fawry-response', 'FawryPaymentController@callback_response')->name('fawry-response');
 
-
-Route::get('/test', function (){
+Route::get('/test', function () {
     return view('welcome');
 });
